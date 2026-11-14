@@ -1,0 +1,208 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AA000001 /* PopCalApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000001; };
+		AA000002 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000002; };
+		AA000003 /* AppPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000003; };
+		AA000004 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000004; };
+		AA000005 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000005; };
+		AA000010 /* PopCalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000010; };
+		AA000011 /* AppPreferences.swift in Test Sources */ = {isa = PBXBuildFile; fileRef = BB000003; };
+		AA000012 /* CalendarView.swift in Test Sources */ = {isa = PBXBuildFile; fileRef = BB000004; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		BB000000 /* PopCal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PopCal.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BB000001 /* PopCalApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopCalApp.swift; sourceTree = "<group>"; };
+		BB000002 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		BB000003 /* AppPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPreferences.swift; sourceTree = "<group>"; };
+		BB000004 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
+		BB000005 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		BB000006 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BB000010 /* PopCalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopCalTests.swift; sourceTree = "<group>"; };
+		BB000020 /* PopCalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PopCalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CC000001 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		CC000002 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		DD000001 = {
+			isa = PBXGroup;
+			children = (DD000002, DD000004, DD000003);
+			sourceTree = "<group>";
+		};
+		DD000002 /* PopCal */ = {
+			isa = PBXGroup;
+			children = (BB000001, BB000002, BB000003, BB000004, BB000005, BB000006);
+			path = PopCal;
+			sourceTree = "<group>";
+		};
+		DD000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (BB000000, BB000020);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DD000004 /* PopCalTests */ = {
+			isa = PBXGroup;
+			children = (BB000010);
+			path = PopCalTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		EE000001 /* PopCal */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FF000001;
+			buildPhases = (GG000001, CC000001, GG000002);
+			buildRules = ();
+			dependencies = ();
+			name = PopCal;
+			productName = PopCal;
+			productReference = BB000000;
+			productType = "com.apple.product-type.application";
+		};
+		EE000002 /* PopCalTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FF000010;
+			buildPhases = (GG000003, CC000002);
+			buildRules = ();
+			dependencies = (TE000001);
+			name = PopCalTests;
+			productName = PopCalTests;
+			productReference = BB000020;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		HH000001 = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					EE000001 = { CreatedOnToolsVersion = 15.0; };
+					EE000002 = { CreatedOnToolsVersion = 15.0; TestTargetID = EE000001; };
+				};
+			};
+			buildConfigurationList = FF000002;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (en, Base);
+			mainGroup = DD000001;
+			productRefGroup = DD000003;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (EE000001, EE000002);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		GG000002 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		GG000001 = {
+			isa = PBXSourcesBuildPhase; buildActionMask = 2147483647;
+			files = (AA000001, AA000002, AA000003, AA000004, AA000005);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		GG000003 = {
+			isa = PBXSourcesBuildPhase; buildActionMask = 2147483647;
+			files = (AA000010, AA000011, AA000012);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		TE000001 = {isa = PBXTargetDependency; target = EE000001; };
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		FF000003 /* Debug (Project) */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO; DEBUG_INFORMATION_FORMAT = dwarf; ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 0; GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1", "$(inherited)");
+				MACOSX_DEPLOYMENT_TARGET = 13.0; ONLY_ACTIVE_ARCH = YES; SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)"; SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		FF000004 /* Release (Project) */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; ENABLE_NS_ASSERTIONS = NO;
+				MACOSX_DEPLOYMENT_TARGET = 13.0; SDKROOT = macosx; SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		FF000005 /* Debug (App) */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PopCal/PopCal.entitlements; CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = PopCal/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks");
+				MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.popcal.app;
+				PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		FF000006 /* Release (App) */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PopCal/PopCal.entitlements; CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = PopCal/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks");
+				MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.popcal.app;
+				PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		FF000011 /* Debug (Tests) */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)"; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES; MACOSX_DEPLOYMENT_TARGET = 13.0; MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.popcal.app.tests; PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx; SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PopCal.app/Contents/MacOS/PopCal";
+			};
+			name = Debug;
+		};
+		FF000012 /* Release (Tests) */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)"; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES; MACOSX_DEPLOYMENT_TARGET = 13.0; MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.popcal.app.tests; PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx; SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PopCal.app/Contents/MacOS/PopCal";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		FF000001 = {isa = XCConfigurationList; buildConfigurations = (FF000005, FF000006); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		FF000002 = {isa = XCConfigurationList; buildConfigurations = (FF000003, FF000004); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		FF000010 = {isa = XCConfigurationList; buildConfigurations = (FF000011, FF000012); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
+	};
+	rootObject = HH000001;
+}
