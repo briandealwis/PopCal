@@ -36,6 +36,19 @@ In Xcode:
 
 Press **⌘R** in Xcode. The app will appear in your menubar — no Dock icon.
 
+### Building from the command line
+
+```bash
+./build.sh            # Release build → build/PopCal.app
+./build.sh run        # Debug build and launch
+./build.sh test       # Run unit tests
+./build.sh install    # Release build, copied to ~/Applications
+./build.sh dist       # Release build, zipped to build/PopCal-<version>.zip
+./build.sh clean
+```
+
+Builds are ad-hoc signed by default. To sign with your developer identity, set `DEVELOPMENT_TEAM=<your team ID>`.
+
 ### 4. (Optional) Launch at Login
 
 To have PopCal start automatically:
