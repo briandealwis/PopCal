@@ -1,6 +1,21 @@
 import Foundation
 import AppKit
 
+/// Where clicking a day in the calendar takes you.
+enum CalendarDestination: String, CaseIterable, Identifiable {
+    case system
+    case google
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .system: return "Calendar app"
+        case .google: return "Google Calendar"
+        }
+    }
+}
+
 class AppPreferences: ObservableObject {
     static let shared = AppPreferences()
 
@@ -29,6 +44,10 @@ class AppPreferences: ObservableObject {
         }
     }
 
+    @Published var calendarDestination: CalendarDestination {
+        didSet { UserDefaults.standard.set(calendarDestination.rawValue, forKey: "calendarDestination") }
+    }
+
     @Published var showWeekNumbers: Bool {
         didSet { UserDefaults.standard.set(showWeekNumbers, forKey: "showWeekNumbers") }
     }
@@ -40,6 +59,8 @@ class AppPreferences: ObservableObject {
         let rawMods = UserDefaults.standard.object(forKey: "hotkeyModifiers") as? UInt ?? NSEvent.ModifierFlags.command.rawValue
         hotkeyModifiers = NSEvent.ModifierFlags(rawValue: rawMods)
         showWeekNumbers = UserDefaults.standard.object(forKey: "showWeekNumbers") as? Bool ?? false
+        calendarDestination = UserDefaults.standard.string(forKey: "calendarDestination")
+            .flatMap(CalendarDestination.init(rawValue:)) ?? .system
     }
 
     var hotkeyDisplayString: String {

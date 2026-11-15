@@ -341,6 +341,7 @@ struct WeekGrid: View, Animatable {
                             isWeekend: weekendColumns[column],
                             calendar: geometry.calendar
                         )
+                        .onTapGesture { CalendarOpener.open(date) }
                     }
                 }
                 .frame(height: rowHeight)
@@ -410,6 +411,8 @@ struct DayCell: View {
     let isWeekend: Bool
     let calendar: Calendar
 
+    @State private var isHovered = false
+
     var isToday: Bool { calendar.isDateInToday(date) }
 
     var body: some View {
@@ -417,6 +420,10 @@ struct DayCell: View {
             if isToday {
                 Circle()
                     .fill(Color.accentColor)
+                    .frame(width: 28, height: 28)
+            } else if isHovered {
+                Circle()
+                    .fill(Color.primary.opacity(0.08))
                     .frame(width: 28, height: 28)
             }
 
@@ -428,13 +435,86 @@ struct DayCell: View {
         .frame(maxWidth: .infinity)
         .frame(height: CalendarView.rowHeight)
         .contentShape(Rectangle())
+        .onHover { isHovered = $0 }
+        .help(Self.helpFormatter.string(from: date))
     }
+
+    private static let helpFormatter: DateFormatter = {
+        let fmt = DateFormatter()
+        fmt.dateStyle = .full
+        return fmt
+    }()
 
     var textColor: Color {
         if isToday { return .white }
         if !isInFocusedMonth { return .secondary.opacity(0.5) }
         if isWeekend { return .secondary }
         return .primary
+    }
+}
+
+// MARK: - Opening a day
+
+/// Opens the user's calendar (Calendar.app or Google Calendar, per Settings) on a given day.
+enum CalendarOpener {
+    /// Year/month/day in the Gregorian calendar, which both Google Calendar
+    /// URLs and AppleScript dates use, whatever the user's system calendar is.
+    static func gregorianComponents(of date: Date) -> (year: Int, month: Int, day: Int) {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = .current
+        let c = cal.dateComponents([.year, .month, .day], from: date)
+        return (c.year!, c.month!, c.day!)
+    }
+
+    static func googleCalendarURL(for date: Date) -> URL {
+        let (y, m, d) = gregorianComponents(of: date)
+        return URL(string: "https://calendar.google.com/calendar/r/day/\(y)/\(m)/\(d)")!
+    }
+
+    /// AppleScript that shows `date` in Calendar's day view. The date is built
+    /// field by field so it doesn't depend on the locale's date format.
+    static func calendarAppScript(for date: Date) -> String {
+        let (y, m, d) = gregorianComponents(of: date)
+        return """
+        set theDate to current date
+        set day of theDate to 1
+        set year of theDate to \(y)
+        set month of theDate to \(m)
+        set day of theDate to \(d)
+        set time of theDate to 12 * hours
+        tell application "Calendar"
+            activate
+            switch view to day view
+            view calendar at theDate
+        end tell
+        """
+    }
+
+    private static let scriptQueue = DispatchQueue(label: "PopCal.CalendarOpener")
+
+    static func open(_ date: Date) {
+        (NSApp.delegate as? AppDelegate)?.popover?.performClose(nil)
+
+        switch AppPreferences.shared.calendarDestination {
+        case .google:
+            NSWorkspace.shared.open(googleCalendarURL(for: date))
+        case .system:
+            let source = calendarAppScript(for: date)
+            // Off the main thread: the first run waits on the automation permission prompt.
+            scriptQueue.async {
+                var error: NSDictionary?
+                NSAppleScript(source: source)?.executeAndReturnError(&error)
+                if error != nil {
+                    // Permission denied or scripting failed: at least bring up Calendar.
+                    DispatchQueue.main.async { openCalendarApp() }
+                }
+            }
+        }
+    }
+
+    private static func openCalendarApp() {
+        guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.iCal") else { return }
+        NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
     }
 }
 

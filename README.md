@@ -8,6 +8,7 @@ A lightweight macOS menubar calendar app. Lives in your system tray, shows the c
 - **Global hotkey** — configurable keyboard shortcut (default: ⌘Space) to summon the calendar from anywhere
 - **Infinite scrolling** — scroll with two fingers on the trackpad (or a mouse wheel, or click-drag) to move continuously through the weeks; the chevron buttons jump a month at a time
 - **Weekend shading** — weekend columns are subtly greyed out
+- **Open a day** — click any day to open it in the Calendar app (default) or Google Calendar in your browser, chosen in Settings. The first time PopCal opens the Calendar app, macOS asks for permission to control it.
 - **Today highlighting** — today's date is always clearly marked with your accent color
 - **Configurable week start** — choose Sunday or Monday as the first day of the week
 - **Settings** — right-click or ⌘-click the menubar icon to access settings

@@ -352,3 +352,40 @@ final class CalendarGeometryTests: XCTestCase {
         XCTAssertEqual(geo.weekendColumns, [false, false, false, false, false, true, true])
     }
 }
+
+// MARK: - CalendarOpener Tests
+
+final class CalendarOpenerTests: XCTestCase {
+
+    func localDate(_ y: Int, _ m: Int, _ d: Int) -> Date {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = .current
+        return cal.date(from: DateComponents(year: y, month: m, day: d, hour: 9))!
+    }
+
+    func testGoogleCalendarURL() {
+        XCTAssertEqual(CalendarOpener.googleCalendarURL(for: localDate(2026, 11, 5)).absoluteString,
+                       "https://calendar.google.com/calendar/r/day/2026/11/5")
+    }
+
+    func testCalendarAppScriptSetsDateFields() {
+        let script = CalendarOpener.calendarAppScript(for: localDate(2027, 2, 28))
+        XCTAssertTrue(script.contains("set year of theDate to 2027"))
+        XCTAssertTrue(script.contains("set month of theDate to 2"))
+        XCTAssertTrue(script.contains("set day of theDate to 28"))
+        XCTAssertTrue(script.contains("view calendar at theDate"))
+        // Day is reset to 1 before changing month, so e.g. Jan 31 → Feb doesn't overflow.
+        let resetIndex = script.range(of: "set day of theDate to 1\n")!.lowerBound
+        let monthIndex = script.range(of: "set month of theDate")!.lowerBound
+        XCTAssertLessThan(resetIndex, monthIndex)
+    }
+
+    func testDefaultDestinationIsSystemCalendar() {
+        let key = "calendarDestination"
+        let saved = UserDefaults.standard.object(forKey: key)
+        defer { UserDefaults.standard.set(saved, forKey: key) }
+        UserDefaults.standard.removeObject(forKey: key)
+        XCTAssertNil(UserDefaults.standard.string(forKey: key).flatMap(CalendarDestination.init(rawValue:)))
+        XCTAssertEqual(CalendarDestination(rawValue: "google"), .google)
+    }
+}

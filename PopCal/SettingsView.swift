@@ -37,6 +37,16 @@ struct SettingsView: View {
                                 .pickerStyle(.segmented)
                                 .frame(width: 160)
                             }
+
+                            settingsRow(label: "Clicking a day opens") {
+                                Picker("", selection: $prefs.calendarDestination) {
+                                    ForEach(CalendarDestination.allCases) { destination in
+                                        Text(destination.displayName).tag(destination)
+                                    }
+                                }
+                                .labelsHidden()
+                                .frame(width: 160)
+                            }
                         }
                     }
 
@@ -103,7 +113,7 @@ struct SettingsView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 10)
         }
-        .frame(width: 380, height: 260)
+        .frame(width: 380, height: 300)
         .background(Color(nsColor: .windowBackgroundColor))
         .onDisappear { stopRecording() }
     }

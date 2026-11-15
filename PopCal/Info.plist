@@ -24,6 +24,8 @@
 	<true/>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>PopCal opens the Calendar app on the day you click.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2025. All rights reserved.</string>
 	<key>NSSupportsAutomaticTermination</key>
