@@ -13,8 +13,7 @@
 		AA000004 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000004; };
 		AA000005 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000005; };
 		AA000010 /* PopCalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000010; };
-		AA000011 /* AppPreferences.swift in Test Sources */ = {isa = PBXBuildFile; fileRef = BB000003; };
-		AA000012 /* CalendarView.swift in Test Sources */ = {isa = PBXBuildFile; fileRef = BB000004; };
+		AA000013 /* ScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000011; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +25,7 @@
 		BB000005 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		BB000006 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BB000010 /* PopCalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopCalTests.swift; sourceTree = "<group>"; };
+		BB000011 /* ScreenshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
 		BB000020 /* PopCalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PopCalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -54,7 +54,7 @@
 		};
 		DD000004 /* PopCalTests */ = {
 			isa = PBXGroup;
-			children = (BB000010);
+			children = (BB000010, BB000011);
 			path = PopCalTests;
 			sourceTree = "<group>";
 		};
@@ -122,7 +122,7 @@
 		};
 		GG000003 = {
 			isa = PBXSourcesBuildPhase; buildActionMask = 2147483647;
-			files = (AA000010, AA000011, AA000012);
+			files = (AA000010, AA000013);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */

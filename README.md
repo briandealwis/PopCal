@@ -4,6 +4,12 @@
 
 A lightweight macOS menubar calendar app. Lives in your system tray, shows the current month in a clean popover, and stays out of your way.
 
+<p align="center">
+  <img src="docs/screenshots/calendar-light.png" width="300" alt="PopCal calendar in light mode">
+  &nbsp;
+  <img src="docs/screenshots/calendar-dark.png" width="300" alt="PopCal calendar in dark mode">
+</p>
+
 ## Features
 
 - **Menubar icon** — click to show/hide the calendar popover
@@ -46,6 +52,7 @@ Press **⌘R** in Xcode. The app will appear in your menubar — no Dock icon.
 ./build.sh            # Release build → build/PopCal.app
 ./build.sh run        # Debug build and launch
 ./build.sh test       # Run unit tests
+./build.sh screenshots  # Regenerate docs/screenshots/*.png
 ./build.sh install    # Release build, copied to ~/Applications
 ./build.sh dist       # Release build, zipped to build/PopCal-<version>.zip
 ./build.sh clean

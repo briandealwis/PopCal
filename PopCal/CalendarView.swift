@@ -9,12 +9,19 @@ import AppKit
 
 struct CalendarView: View {
     @StateObject private var prefs = AppPreferences.shared
-    @State private var anchorMonth: Date = Date().startOfMonth()
+    @State private var anchorMonth: Date
     @State private var offset: Double = 0
     @State private var dragStartOffset: Double?
     @State private var pendingSnap: DispatchWorkItem?
 
-    private let today = Date()
+    /// Pins "now" (for screenshots and tests); nil means the real current time.
+    private let fixedNow: Date?
+    private var now: Date { fixedNow ?? Date() }
+
+    init(now: Date? = nil) {
+        fixedNow = now
+        _anchorMonth = State(initialValue: (now ?? Date()).startOfMonth())
+    }
 
     static let rowHeight: CGFloat = 32
     static let visibleRows = 6
@@ -54,7 +61,7 @@ struct CalendarView: View {
                     weekdayRow(weekend: weekend)
                         .padding(.top, 6)
 
-                    WeekGrid(offset: offset, geometry: geo, weekendColumns: weekend)
+                    WeekGrid(offset: offset, geometry: geo, today: now, weekendColumns: weekend)
                         .contentShape(Rectangle())
                         .gesture(dragGesture)
                 }
@@ -131,12 +138,12 @@ struct CalendarView: View {
     var footerView: some View {
         HStack {
             if !isShowingCurrentMonth {
-                Button("Today") { scroll(toMonth: Date()) }
+                Button("Today") { scroll(toMonth: now) }
                     .buttonStyle(.plain)
                     .font(.system(size: 11, weight: .medium, design: .rounded))
                     .foregroundColor(.accentColor)
             } else {
-                Text(Self.todayFormatter.string(from: today))
+                Text(Self.todayFormatter.string(from: now))
                     .font(.system(size: 11, design: .rounded))
                     .foregroundColor(.secondary)
             }
@@ -237,7 +244,7 @@ struct CalendarView: View {
     // MARK: - Computed
 
     var isShowingCurrentMonth: Bool {
-        calendar.isDate(focusedMonth, equalTo: Date(), toGranularity: .month)
+        calendar.isDate(focusedMonth, equalTo: now, toGranularity: .month)
     }
 
     /// Very short weekday symbols ("S", "M", …), rotated to the configured first weekday.
@@ -316,6 +323,7 @@ struct CalendarGeometry {
 struct WeekGrid: View, Animatable {
     var offset: Double
     let geometry: CalendarGeometry
+    let today: Date
     let weekendColumns: [Bool]
 
     var animatableData: Double {
@@ -339,6 +347,7 @@ struct WeekGrid: View, Animatable {
                             date: date,
                             isInFocusedMonth: geometry.calendar.isDate(date, equalTo: focusedMonth, toGranularity: .month),
                             isWeekend: weekendColumns[column],
+                            isToday: geometry.calendar.isDate(date, inSameDayAs: today),
                             calendar: geometry.calendar
                         )
                         .onTapGesture { CalendarOpener.open(date) }
@@ -409,11 +418,10 @@ struct DayCell: View {
     let date: Date
     let isInFocusedMonth: Bool
     let isWeekend: Bool
+    let isToday: Bool
     let calendar: Calendar
 
     @State private var isHovered = false
-
-    var isToday: Bool { calendar.isDateInToday(date) }
 
     var body: some View {
         ZStack {

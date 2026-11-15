@@ -10,6 +10,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: Build and test
@@ -26,3 +29,38 @@ jobs:
 
       - name: Build Release app
         run: ./build.sh build
+
+  screenshots:
+    name: Screenshots
+    needs: test
+    runs-on: macos-15
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Render screenshots
+        run: ./build.sh screenshots
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: docs/screenshots/*.png
+
+      # On main, commit the screenshots if they changed. Pushes made with
+      # GITHUB_TOKEN don't trigger workflows, so this can't loop.
+      - name: Commit updated screenshots
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          if [ -z "$(git status --porcelain -- docs/screenshots)" ]; then
+            echo "Screenshots unchanged."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/screenshots
+          git commit -m "docs: update screenshots for ${GITHUB_SHA::7}"
+          git pull --rebase origin main
+          git push origin HEAD:main

@@ -8,6 +8,8 @@
 #   build     Build a Release PopCal.app into build/ (default)
 #   debug     Build a Debug PopCal.app into build/
 #   test      Run the unit tests
+#   screenshots  Render README screenshots into docs/screenshots/
+#             (override with SCREENSHOT_DIR=path)
 #   run       Build (Debug) and launch the app
 #   install   Build (Release) and copy PopCal.app to ~/Applications
 #   dist      Build (Release) and package build/PopCal-<version>.zip
@@ -107,6 +109,16 @@ case "$cmd" in
         log "Running tests"
         xcbuild -configuration Debug test
         ;;
+    screenshots)
+        out="${SCREENSHOT_DIR:-docs/screenshots}"
+        mkdir -p "$out"
+        out="$(cd "$out" && pwd)"
+        log "Rendering screenshots into $out"
+        # xcodebuild passes TEST_RUNNER_-prefixed variables to the test process.
+        TEST_RUNNER_POPCAL_SCREENSHOT_DIR="$out" \
+            xcbuild -configuration Debug test -only-testing:PopCalTests/ScreenshotTests
+        ls -1 "$out"
+        ;;
     run)
         build_app Debug
         quit_running_app
@@ -134,7 +146,7 @@ case "$cmd" in
         rm -rf "$BUILD_DIR"
         ;;
     -h|--help|help)
-        sed -n '3,20p' "$0" | sed 's/^# \{0,1\}//'
+        sed -n '3,22p' "$0" | sed 's/^# \{0,1\}//'
         ;;
     *)
         echo "Unknown command: $cmd" >&2
