@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import os
 
 // The calendar is an endless, continuously scrolling list of weeks. `offset`
 // is measured in weeks relative to the week containing the first day of the
@@ -491,6 +492,10 @@ enum CalendarOpener {
         set day of theDate to \(d)
         set time of theDate to 12 * hours
         tell application "Calendar"
+            if it is not running then
+                launch
+                delay 1
+            end if
             activate
             switch view to day view
             view calendar at theDate
@@ -498,7 +503,7 @@ enum CalendarOpener {
         """
     }
 
-    private static let scriptQueue = DispatchQueue(label: "PopCal.CalendarOpener")
+    private static let log = Logger(subsystem: "com.popcal.app", category: "CalendarOpener")
 
     static func open(_ date: Date) {
         (NSApp.delegate as? AppDelegate)?.popover?.performClose(nil)
@@ -507,16 +512,61 @@ enum CalendarOpener {
         case .google:
             NSWorkspace.shared.open(googleCalendarURL(for: date))
         case .system:
-            let source = calendarAppScript(for: date)
-            // Off the main thread: the first run waits on the automation permission prompt.
-            scriptQueue.async {
-                var error: NSDictionary?
-                NSAppleScript(source: source)?.executeAndReturnError(&error)
-                if error != nil {
-                    // Permission denied or scripting failed: at least bring up Calendar.
-                    DispatchQueue.main.async { openCalendarApp() }
+            runCalendarScript(calendarAppScript(for: date))
+        }
+    }
+
+    /// Runs the script with osascript so it never blocks PopCal (the first run
+    /// waits on the automation permission prompt) and errors are reported.
+    private static func runCalendarScript(_ source: String) {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+        process.arguments = ["-e", source]
+        let stderr = Pipe()
+        process.standardError = stderr
+        process.standardOutput = FileHandle.nullDevice
+        process.terminationHandler = { process in
+            guard process.terminationStatus != 0 else { return }
+            let message = String(data: stderr.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
+                .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            log.error("Opening Calendar failed (status \(process.terminationStatus)): \(message, privacy: .public)")
+            DispatchQueue.main.async {
+                if message.contains("-1743") {
+                    showAutomationPermissionAlert()
+                } else {
+                    openCalendarApp()
                 }
             }
+        }
+        do {
+            try process.run()
+        } catch {
+            log.error("Couldn't run osascript: \(error.localizedDescription, privacy: .public)")
+            openCalendarApp()
+        }
+    }
+
+    /// Error -1743: macOS refused to let PopCal control Calendar.
+    private static func showAutomationPermissionAlert() {
+        let alert = NSAlert()
+        alert.messageText = "PopCal isn't allowed to control Calendar"
+        alert.informativeText = """
+        To open Calendar on the day you click, turn on Calendar under PopCal in \
+        System Settings → Privacy & Security → Automation.
+
+        If PopCal isn't listed there, reset its permission in Terminal, then click a day again:
+        tccutil reset AppleEvents com.popcal.app
+        """
+        alert.addButton(withTitle: "Open System Settings")
+        alert.addButton(withTitle: "Open Calendar")
+        NSApp.activate(ignoringOtherApps: true)
+        switch alert.runModal() {
+        case .alertFirstButtonReturn:
+            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation") {
+                NSWorkspace.shared.open(url)
+            }
+        default:
+            openCalendarApp()
         }
     }
 
