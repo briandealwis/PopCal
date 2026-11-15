@@ -72,7 +72,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         popover?.contentSize = NSSize(width: 300, height: 320)
         popover?.behavior = .transient
         popover?.animates = true
-        popover?.contentViewController = NSHostingController(rootView: CalendarView())
+        popover?.contentViewController = CalendarHostingController(rootView: CalendarView())
+        NotificationCenter.default.addObserver(self, selector: #selector(focusPopover),
+                                               name: NSApplication.didBecomeActiveNotification, object: nil)
     }
 
     func togglePopover(_ sender: NSStatusBarButton) {
@@ -80,21 +82,37 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if popover.isShown {
             popover.performClose(sender)
         } else {
-            NotificationCenter.default.post(name: .popCalWillShow, object: nil)
-            popover.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
-            popover.contentViewController?.view.window?.makeKey()
-            // Activate so key presses (arrows, Return, Esc…) reach the popover.
-            NSApp.activate(ignoringOtherApps: true)
+            presentPopover(popover, from: sender)
         }
     }
 
     func showPopover() {
         guard let popover = popover, !popover.isShown,
               let button = statusItem?.button else { return }
+        presentPopover(popover, from: button)
+    }
+
+    /// Activates PopCal before showing the popover and making it key, so key
+    /// presses (arrows, Return, Esc…) go to the popover rather than the app
+    /// that was in front. On macOS 14+ activation is cooperative, so it must
+    /// be requested first; `activate(ignoringOtherApps:)` is ignored there.
+    private func presentPopover(_ popover: NSPopover, from button: NSStatusBarButton) {
         NotificationCenter.default.post(name: .popCalWillShow, object: nil)
+        if #available(macOS 14.0, *) {
+            NSApp.activate()
+        } else {
+            NSApp.activate(ignoringOtherApps: true)
+        }
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-        popover.contentViewController?.view.window?.makeKey()
-        NSApp.activate(ignoringOtherApps: true)
+        focusPopover()
+    }
+
+    /// Makes the popover's window key. Also called when PopCal finishes
+    /// activating, in case activation completed after the popover appeared.
+    @objc func focusPopover() {
+        guard let popover = popover, popover.isShown,
+              let window = popover.contentViewController?.view.window else { return }
+        window.makeKey()
     }
 
     // MARK: - Settings
@@ -163,5 +181,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         hotKeyRef = nil
         if let handler = eventHandler { RemoveEventHandler(handler) }
         eventHandler = nil
+    }
+}
+
+/// Hosts the calendar. Esc in the popover's window sends cancelOperation(_:)
+/// up the responder chain; close the popover when it gets here. (CalendarView
+/// also handles Esc directly.)
+final class CalendarHostingController: NSHostingController<CalendarView> {
+    override func cancelOperation(_ sender: Any?) {
+        (NSApp.delegate as? AppDelegate)?.popover?.performClose(sender)
     }
 }
