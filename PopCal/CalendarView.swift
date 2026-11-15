@@ -14,6 +14,8 @@ struct CalendarView: View {
     @State private var offset: Double = 0
     @State private var dragStartOffset: Double?
     @State private var pendingSnap: DispatchWorkItem?
+    /// The day chosen with the arrow keys; nil until the keyboard is used.
+    @State private var selectedDate: Date?
 
     /// Pins "now" (for screenshots and tests); nil means the real current time.
     private let fixedNow: Date?
@@ -62,7 +64,7 @@ struct CalendarView: View {
                     weekdayRow(weekend: weekend)
                         .padding(.top, 6)
 
-                    WeekGrid(offset: offset, geometry: geo, today: now, weekendColumns: weekend)
+                    WeekGrid(offset: offset, geometry: geo, today: now, selectedDate: selectedDate, weekendColumns: weekend)
                         .contentShape(Rectangle())
                         .gesture(dragGesture)
                 }
@@ -80,7 +82,8 @@ struct CalendarView: View {
             }
         }
         .frame(width: 300, height: 320)
-        .background(ScrollWheelReceiver(onScroll: handleScroll))
+        .background(EventReceiver(onScroll: handleScroll, onKeyDown: handleKeyDown))
+        .onDisappear { selectedDate = nil }
     }
 
     // MARK: - Header
@@ -139,7 +142,7 @@ struct CalendarView: View {
     var footerView: some View {
         HStack {
             if !isShowingCurrentMonth {
-                Button("Today") { scroll(toMonth: now) }
+                Button("Today") { goToToday() }
                     .buttonStyle(.plain)
                     .font(.system(size: 11, weight: .medium, design: .rounded))
                     .foregroundColor(.accentColor)
@@ -154,10 +157,21 @@ struct CalendarView: View {
 
     // MARK: - Navigation
 
-    /// Chevron buttons: scroll so the first week of the next/previous month is at the top.
+    /// Chevron buttons and n/p: scroll so the first week of the next/previous
+    /// month is at the top. A keyboard selection moves by the same number of months.
     func navigate(months: Int) {
         guard let target = calendar.date(byAdding: .month, value: months, to: focusedMonth) else { return }
+        if let selected = selectedDate {
+            selectedDate = calendar.date(byAdding: .month, value: months, to: selected)
+        }
         scroll(toMonth: target)
+    }
+
+    func goToToday() {
+        if selectedDate != nil {
+            selectedDate = calendar.startOfDay(for: now)
+        }
+        scroll(toMonth: now)
     }
 
     func scroll(toMonth month: Date) {
@@ -185,6 +199,67 @@ struct CalendarView: View {
                     offset = predicted.rounded()
                 }
             }
+    }
+
+    // MARK: - Keyboard
+
+    /// Returns true if the key was handled.
+    private func handleKeyDown(_ event: NSEvent) -> Bool {
+        // Leave ⌘/⌃/⌥ shortcuts to the system.
+        guard event.modifierFlags.intersection([.command, .control, .option]).isEmpty else { return false }
+
+        switch event.keyCode {
+        case 123: moveSelection(byDays: -1)          // ←
+        case 124: moveSelection(byDays: 1)           // →
+        case 125: moveSelection(byDays: 7)           // ↓
+        case 126: moveSelection(byDays: -7)          // ↑
+        case 36, 76:                                 // Return, keypad Enter
+            CalendarOpener.open(selectedDate ?? now)
+        case 53:                                     // Esc
+            (NSApp.delegate as? AppDelegate)?.popover?.performClose(nil)
+        default:
+            switch event.charactersIgnoringModifiers?.lowercased() {
+            case "t":
+                selectedDate = calendar.startOfDay(for: now)
+                scroll(toMonth: now)
+            case "n": navigate(months: 1)
+            case "p": navigate(months: -1)
+            default: return false
+            }
+        }
+        return true
+    }
+
+    /// The first arrow key press selects today (or the 1st of the month on
+    /// screen); later presses move the selection.
+    private func moveSelection(byDays days: Int) {
+        let next: Date
+        if let selected = selectedDate {
+            next = calendar.date(byAdding: .day, value: days, to: selected) ?? selected
+        } else if calendar.isDate(now, equalTo: focusedMonth, toGranularity: .month) {
+            next = calendar.startOfDay(for: now)
+        } else {
+            next = focusedMonth
+        }
+        selectedDate = next
+        reveal(next)
+    }
+
+    /// Scrolls the least amount needed to bring `date`'s week into view.
+    private func reveal(_ date: Date) {
+        let row = Double(geometry.row(containing: date))
+        let lastVisible = Double(Self.visibleRows - 1)
+        var target = offset.rounded()
+        if row < target {
+            target = row
+        } else if row > target + lastVisible {
+            target = row - lastVisible
+        }
+        guard target != offset else { return }
+        cancelSnap()
+        withAnimation(.easeInOut(duration: 0.2)) {
+            offset = target
+        }
     }
 
     // MARK: - Scroll wheel / trackpad
@@ -325,6 +400,7 @@ struct WeekGrid: View, Animatable {
     var offset: Double
     let geometry: CalendarGeometry
     let today: Date
+    let selectedDate: Date?
     let weekendColumns: [Bool]
 
     var animatableData: Double {
@@ -349,6 +425,7 @@ struct WeekGrid: View, Animatable {
                             isInFocusedMonth: geometry.calendar.isDate(date, equalTo: focusedMonth, toGranularity: .month),
                             isWeekend: weekendColumns[column],
                             isToday: geometry.calendar.isDate(date, inSameDayAs: today),
+                            isSelected: selectedDate.map { geometry.calendar.isDate(date, inSameDayAs: $0) } ?? false,
                             calendar: geometry.calendar
                         )
                         .onTapGesture { CalendarOpener.open(date) }
@@ -420,6 +497,7 @@ struct DayCell: View {
     let isInFocusedMonth: Bool
     let isWeekend: Bool
     let isToday: Bool
+    var isSelected: Bool = false
     let calendar: Calendar
 
     @State private var isHovered = false
@@ -430,10 +508,16 @@ struct DayCell: View {
                 Circle()
                     .fill(Color.accentColor)
                     .frame(width: 28, height: 28)
-            } else if isHovered {
+            } else if isHovered || isSelected {
                 Circle()
                     .fill(Color.primary.opacity(0.08))
                     .frame(width: 28, height: 28)
+            }
+
+            if isSelected {
+                Circle()
+                    .strokeBorder(Color.accentColor, lineWidth: 1.5)
+                    .frame(width: isToday ? 32 : 28, height: isToday ? 32 : 28)
             }
 
             Text("\(calendar.component(.day, from: date))")
@@ -576,22 +660,26 @@ enum CalendarOpener {
     }
 }
 
-// MARK: - Scroll wheel events
+// MARK: - Scroll wheel and keyboard events
 
 /// Two-finger trackpad scrolls arrive as scroll-wheel events, which SwiftUI
-/// gestures don't see on macOS 13. This view watches for scroll events over
-/// its bounds in its window and forwards them. It never takes mouse clicks.
-struct ScrollWheelReceiver: NSViewRepresentable {
+/// gestures don't see on macOS 13, and key handling (`onKeyPress`) needs
+/// macOS 14. This view watches its window for scroll events over its bounds
+/// and for key presses, and forwards them. It never takes mouse clicks.
+struct EventReceiver: NSViewRepresentable {
     var onScroll: (NSEvent) -> Void
+    /// Returns true if the key was handled (and should not go further).
+    var onKeyDown: (NSEvent) -> Bool
 
     func makeNSView(context: Context) -> MonitorView {
         let view = MonitorView()
-        view.onScroll = onScroll
+        updateNSView(view, context: context)
         return view
     }
 
     func updateNSView(_ view: MonitorView, context: Context) {
         view.onScroll = onScroll
+        view.onKeyDown = onKeyDown
     }
 
     static func dismantleNSView(_ view: MonitorView, coordinator: ()) {
@@ -600,14 +688,18 @@ struct ScrollWheelReceiver: NSViewRepresentable {
 
     final class MonitorView: NSView {
         var onScroll: ((NSEvent) -> Void)?
+        var onKeyDown: ((NSEvent) -> Bool)?
         private var monitor: Any?
 
         override func viewDidMoveToWindow() {
             super.viewDidMoveToWindow()
             removeMonitor()
             guard window != nil else { return }
-            monitor = NSEvent.addLocalMonitorForEvents(matching: .scrollWheel) { [weak self] event in
+            monitor = NSEvent.addLocalMonitorForEvents(matching: [.scrollWheel, .keyDown]) { [weak self] event in
                 guard let self, let window = self.window, event.window === window else { return event }
+                if event.type == .keyDown {
+                    return self.onKeyDown?(event) == true ? nil : event
+                }
                 let point = self.convert(event.locationInWindow, from: nil)
                 guard self.bounds.contains(point) else { return event }
                 self.onScroll?(event)

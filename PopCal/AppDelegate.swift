@@ -77,6 +77,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             popover.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
             popover.contentViewController?.view.window?.makeKey()
+            // Activate so key presses (arrows, Return, Esc…) reach the popover.
+            NSApp.activate(ignoringOtherApps: true)
         }
     }
 
