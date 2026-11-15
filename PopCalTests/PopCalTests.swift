@@ -266,3 +266,89 @@ final class CalendarDayModelTests: XCTestCase {
         XCTAssertFalse(day.isCurrentMonth)
     }
 }
+
+// MARK: - CalendarGeometry Tests
+
+final class CalendarGeometryTests: XCTestCase {
+
+    func makeCalendar(startsOnMonday: Bool) -> Calendar {
+        var cal = Calendar(identifier: .gregorian)
+        cal.locale = Locale(identifier: "en_US")
+        cal.timeZone = TimeZone(identifier: "America/Vancouver")!
+        cal.firstWeekday = startsOnMonday ? 2 : 1
+        return cal
+    }
+
+    func date(_ string: String, _ cal: Calendar) -> Date {
+        let fmt = DateFormatter()
+        fmt.calendar = cal
+        fmt.timeZone = cal.timeZone
+        fmt.dateFormat = "yyyy-MM-dd"
+        return fmt.date(from: string)!
+    }
+
+    func testRowZeroContainsFirstOfReferenceMonth() {
+        let cal = makeCalendar(startsOnMonday: false)
+        let geo = CalendarGeometry(calendar: cal, referenceMonth: date("2026-05-17", cal))
+        // May 1, 2026 is a Friday; with a Sunday start the anchor is Sunday April 26.
+        XCTAssertEqual(geo.anchor, date("2026-04-26", cal))
+        XCTAssertEqual(geo.row(containing: date("2026-05-01", cal)), 0)
+        XCTAssertEqual(geo.date(row: 0, column: 5), date("2026-05-01", cal))
+    }
+
+    func testMondayStartAnchorIsMonday() {
+        let cal = makeCalendar(startsOnMonday: true)
+        let geo = CalendarGeometry(calendar: cal, referenceMonth: date("2026-05-01", cal))
+        XCTAssertEqual(geo.anchor, date("2026-04-27", cal))
+        XCTAssertEqual(cal.component(.weekday, from: geo.anchor), 2)
+    }
+
+    func testRowsExtendInBothDirections() {
+        let cal = makeCalendar(startsOnMonday: false)
+        let geo = CalendarGeometry(calendar: cal, referenceMonth: date("2026-05-01", cal))
+        XCTAssertEqual(geo.row(containing: date("2026-04-25", cal)), -1)
+        XCTAssertEqual(geo.row(containing: date("2026-04-26", cal)), 0)
+        XCTAssertEqual(geo.row(containing: date("2026-05-03", cal)), 1)
+        // Far away in either direction
+        let past = date("1999-12-31", cal)
+        let future = date("2100-01-01", cal)
+        XCTAssertTrue(cal.isDate(geo.date(row: geo.row(containing: past), column: cal.component(.weekday, from: past) - 1), inSameDayAs: past))
+        XCTAssertTrue(cal.isDate(geo.date(row: geo.row(containing: future), column: cal.component(.weekday, from: future) - 1), inSameDayAs: future))
+    }
+
+    func testRowsAcrossDaylightSavingChange() {
+        let cal = makeCalendar(startsOnMonday: false)
+        let geo = CalendarGeometry(calendar: cal, referenceMonth: date("2026-03-01", cal))
+        // DST starts March 8, 2026 in Vancouver
+        for row in 0..<6 {
+            for column in 0..<7 {
+                let d = geo.date(row: row, column: column)
+                XCTAssertEqual(geo.row(containing: d), row)
+                XCTAssertEqual(cal.component(.weekday, from: d), column + 1)
+            }
+        }
+    }
+
+    func testFocusedMonthAtMonthStartRow() {
+        let cal = makeCalendar(startsOnMonday: false)
+        let geo = CalendarGeometry(calendar: cal, referenceMonth: date("2026-05-01", cal))
+        for monthString in ["2026-01-01", "2026-02-01", "2026-05-01", "2026-08-01", "2027-03-01"] {
+            let month = date(monthString, cal)
+            let row = geo.row(forMonthOf: month)
+            let focused = geo.focusedMonth(offset: Double(row), visibleRows: 6)
+            XCTAssertEqual(focused, month, "Scrolling to \(monthString) should focus it")
+        }
+    }
+
+    func testWeekendColumnsSundayStart() {
+        let cal = makeCalendar(startsOnMonday: false)
+        let geo = CalendarGeometry(calendar: cal, referenceMonth: date("2026-05-01", cal))
+        XCTAssertEqual(geo.weekendColumns, [true, false, false, false, false, false, true])
+    }
+
+    func testWeekendColumnsMondayStart() {
+        let cal = makeCalendar(startsOnMonday: true)
+        let geo = CalendarGeometry(calendar: cal, referenceMonth: date("2026-05-01", cal))
+        XCTAssertEqual(geo.weekendColumns, [false, false, false, false, false, true, true])
+    }
+}

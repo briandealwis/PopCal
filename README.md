@@ -6,7 +6,8 @@ A lightweight macOS menubar calendar app. Lives in your system tray, shows the c
 
 - **Menubar icon** — click to show/hide the calendar popover
 - **Global hotkey** — configurable keyboard shortcut (default: ⌘Space) to summon the calendar from anywhere
-- **Month navigation** — swipe up/down on the calendar, or use the chevron buttons, to navigate months
+- **Infinite scrolling** — scroll with two fingers on the trackpad (or a mouse wheel, or click-drag) to move continuously through the weeks; the chevron buttons jump a month at a time
+- **Weekend shading** — weekend columns are subtly greyed out
 - **Today highlighting** — today's date is always clearly marked with your accent color
 - **Configurable week start** — choose Sunday or Monday as the first day of the week
 - **Settings** — right-click or ⌘-click the menubar icon to access settings
