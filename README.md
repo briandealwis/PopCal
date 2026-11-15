@@ -1,5 +1,7 @@
 # PopCal 🗓️
 
+[![Tests](https://github.com/briandealwis/PopCal/actions/workflows/test.yml/badge.svg)](https://github.com/briandealwis/PopCal/actions/workflows/test.yml)
+
 A lightweight macOS menubar calendar app. Lives in your system tray, shows the current month in a clean popover, and stays out of your way.
 
 ## Features
