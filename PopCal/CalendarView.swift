@@ -231,7 +231,7 @@ struct CalendarView: View {
         case 36, 76:                                 // Return, keypad Enter
             CalendarOpener.open(selectedDate ?? now)
         case 53:                                     // Esc
-            (NSApp.delegate as? AppDelegate)?.popover?.performClose(nil)
+            AppDelegate.shared?.closePopover()
         default:
             switch event.charactersIgnoringModifiers?.lowercased() {
             case "t":
@@ -605,7 +605,7 @@ enum CalendarOpener {
     private static let log = Logger(subsystem: "com.popcal.app", category: "CalendarOpener")
 
     static func open(_ date: Date) {
-        (NSApp.delegate as? AppDelegate)?.popover?.performClose(nil)
+        AppDelegate.shared?.closePopover()
 
         switch AppPreferences.shared.calendarDestination {
         case .google:

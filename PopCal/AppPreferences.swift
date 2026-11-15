@@ -93,7 +93,7 @@ class AppPreferences: ObservableObject {
 
     private func reregisterHotKey() {
         DispatchQueue.main.async {
-            if let delegate = NSApp.delegate as? AppDelegate {
+            if let delegate = AppDelegate.shared {
                 delegate.registerHotKey()
             }
         }

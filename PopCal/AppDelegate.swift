@@ -14,6 +14,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var hotKeyRef: EventHotKeyRef?
     var eventHandler: EventHandlerRef?
 
+    /// The app's delegate. With @NSApplicationDelegateAdaptor, `NSApp.delegate`
+    /// is SwiftUI's own object, not this class, so use this instead.
+    private(set) static weak var shared: AppDelegate?
+
+    override init() {
+        super.init()
+        AppDelegate.shared = self
+    }
+
+    func closePopover() {
+        popover?.performClose(nil)
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
 
@@ -189,6 +202,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 /// also handles Esc directly.)
 final class CalendarHostingController: NSHostingController<CalendarView> {
     override func cancelOperation(_ sender: Any?) {
-        (NSApp.delegate as? AppDelegate)?.popover?.performClose(sender)
+        AppDelegate.shared?.closePopover()
     }
 }
