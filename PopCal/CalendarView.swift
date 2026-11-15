@@ -83,7 +83,9 @@ struct CalendarView: View {
         }
         .frame(width: 300, height: 320)
         .background(EventReceiver(onScroll: handleScroll, onKeyDown: handleKeyDown))
-        .onDisappear { selectedDate = nil }
+        .onReceive(NotificationCenter.default.publisher(for: .popCalWillShow)) { _ in
+            resetToToday()
+        }
     }
 
     // MARK: - Header
@@ -165,6 +167,19 @@ struct CalendarView: View {
             selectedDate = calendar.date(byAdding: .month, value: months, to: selected)
         }
         scroll(toMonth: target)
+    }
+
+    /// Each time the popover opens, show the current month with nothing selected.
+    func resetToToday() {
+        cancelSnap()
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            anchorMonth = now.startOfMonth()
+            offset = 0
+            selectedDate = nil
+            dragStartOffset = nil
+        }
     }
 
     func goToToday() {

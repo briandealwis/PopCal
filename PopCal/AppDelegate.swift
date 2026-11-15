@@ -2,6 +2,11 @@ import AppKit
 import SwiftUI
 import Carbon
 
+extension Notification.Name {
+    /// Posted just before the calendar popover is shown.
+    static let popCalWillShow = Notification.Name("PopCalWillShow")
+}
+
 class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem?
     var popover: NSPopover?
@@ -75,6 +80,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if popover.isShown {
             popover.performClose(sender)
         } else {
+            NotificationCenter.default.post(name: .popCalWillShow, object: nil)
             popover.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
             popover.contentViewController?.view.window?.makeKey()
             // Activate so key presses (arrows, Return, Esc…) reach the popover.
@@ -85,6 +91,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func showPopover() {
         guard let popover = popover, !popover.isShown,
               let button = statusItem?.button else { return }
+        NotificationCenter.default.post(name: .popCalWillShow, object: nil)
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         popover.contentViewController?.view.window?.makeKey()
         NSApp.activate(ignoringOtherApps: true)
