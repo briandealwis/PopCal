@@ -52,11 +52,15 @@ class AppPreferences: ObservableObject {
         didSet { UserDefaults.standard.set(showWeekNumbers, forKey: "showWeekNumbers") }
     }
 
+    /// Default global hotkey: ⌥⌘C.
+    static let defaultHotkeyKeyCode = 8 // C
+    static let defaultHotkeyModifiers: NSEvent.ModifierFlags = [.command, .option]
+
     private init() {
         weekStartsOnMonday = UserDefaults.standard.object(forKey: "weekStartsOnMonday") as? Bool ?? false
         hotkeyEnabled = UserDefaults.standard.object(forKey: "hotkeyEnabled") as? Bool ?? true
-        hotkeyKeyCode = UserDefaults.standard.object(forKey: "hotkeyKeyCode") as? Int ?? 49 // Space
-        let rawMods = UserDefaults.standard.object(forKey: "hotkeyModifiers") as? UInt ?? NSEvent.ModifierFlags.command.rawValue
+        hotkeyKeyCode = UserDefaults.standard.object(forKey: "hotkeyKeyCode") as? Int ?? Self.defaultHotkeyKeyCode
+        let rawMods = UserDefaults.standard.object(forKey: "hotkeyModifiers") as? UInt ?? Self.defaultHotkeyModifiers.rawValue
         hotkeyModifiers = NSEvent.ModifierFlags(rawValue: rawMods)
         showWeekNumbers = UserDefaults.standard.object(forKey: "showWeekNumbers") as? Bool ?? false
         calendarDestination = UserDefaults.standard.string(forKey: "calendarDestination")

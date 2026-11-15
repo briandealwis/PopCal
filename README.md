@@ -13,7 +13,7 @@ A lightweight macOS menubar calendar app. Lives in your system tray, shows the c
 ## Features
 
 - **Menubar icon** — click to show/hide the calendar popover
-- **Global hotkey** — configurable keyboard shortcut (default: ⌘Space) to summon the calendar from anywhere
+- **Global hotkey** — configurable keyboard shortcut (default: ⌥⌘C) to summon the calendar from anywhere
 - **Infinite scrolling** — scroll with two fingers on the trackpad (or a mouse wheel, or click-drag) to move continuously through the weeks; the chevron buttons jump a month at a time
 - **Weekend shading** — weekend columns are subtly greyed out
 - **Open a day** — click any day to open it in the Calendar app (default) or Google Calendar in your browser, chosen in Settings. The first time PopCal opens the Calendar app, macOS asks for permission to control it.
@@ -74,11 +74,11 @@ To have PopCal start automatically:
 |--------|--------|
 | Click menubar icon | Show/hide calendar popover |
 | Right-click or ⌘-click icon | Open context menu |
-| Swipe up on calendar | Go to next month |
-| Swipe down on calendar | Go to previous month |
+| Two-finger scroll / mouse wheel / drag | Scroll through weeks |
 | Click chevrons | Navigate months |
+| Click a day | Open that day in Calendar or Google Calendar |
 | Click "Today" (footer) | Jump back to current month |
-| Global hotkey (default ⌘Space) | Show calendar from anywhere |
+| Global hotkey (default ⌥⌘C) | Show calendar from anywhere |
 
 ## Settings
 
@@ -106,8 +106,8 @@ PopCal/
 
 Edit `AppPreferences.swift`:
 ```swift
-hotkeyKeyCode = UserDefaults.standard.object(forKey: "hotkeyKeyCode") as? Int ?? 49 // 49 = Space
-let rawMods = ... ?? NSEvent.ModifierFlags.command.rawValue // change default modifiers
+static let defaultHotkeyKeyCode = 8 // C
+static let defaultHotkeyModifiers: NSEvent.ModifierFlags = [.command, .option]
 ```
 
 Common key codes: `Space=49`, `Return=36`, letters A-Z use the key codes in `keyCodeToString()`.

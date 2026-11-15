@@ -192,13 +192,21 @@ final class AppPreferencesTests: XCTestCase {
     let suiteName = "com.popcal.tests"
     var defaults: UserDefaults!
 
+    // Tests run inside the app, so restore the real hotkey afterwards.
+    var savedKeyCode = 0
+    var savedModifiers: NSEvent.ModifierFlags = []
+
     override func setUp() {
         super.setUp()
         defaults = UserDefaults(suiteName: suiteName)!
         defaults.removePersistentDomain(forName: suiteName)
+        savedKeyCode = AppPreferences.shared.hotkeyKeyCode
+        savedModifiers = AppPreferences.shared.hotkeyModifiers
     }
 
     override func tearDown() {
+        AppPreferences.shared.hotkeyKeyCode = savedKeyCode
+        AppPreferences.shared.hotkeyModifiers = savedModifiers
         defaults.removePersistentDomain(forName: suiteName)
         super.tearDown()
     }
@@ -211,8 +219,11 @@ final class AppPreferencesTests: XCTestCase {
         XCTAssertTrue(AppPreferences.shared.hotkeyEnabled)
     }
 
-    func testDefaultHotkeyKeyCodeIsSpace() {
-        XCTAssertEqual(AppPreferences.shared.hotkeyKeyCode, 49) // Space
+    func testDefaultHotkeyIsOptionCommandC() {
+        let prefs = AppPreferences.shared
+        prefs.hotkeyKeyCode = AppPreferences.defaultHotkeyKeyCode
+        prefs.hotkeyModifiers = AppPreferences.defaultHotkeyModifiers
+        XCTAssertEqual(prefs.hotkeyDisplayString, "⌥⌘C")
     }
 
     func testHotkeyDisplayStringContainsCommand() {
